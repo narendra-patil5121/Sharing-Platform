@@ -17,42 +17,58 @@ app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
+const documentationResponse = {
+  success: true,
+  message: "Welcome to Akatsuki's Draft API - AI-Enabled Content Sharing Platform",
+  version: '1.0.0',
+  documentation: {
+    auth: ['POST /auth/register', 'POST /auth/login', 'GET /auth/me'],
+    posts: [
+      'POST /posts',
+      'GET /posts',
+      'GET /posts/:id',
+      'GET /posts/my-posts',
+      'PATCH /posts/:id',
+      'DELETE /posts/:id',
+    ],
+    admin: [
+      'GET /admin/posts/pending',
+      'PATCH /admin/posts/approve/:id',
+      'PATCH /admin/posts/reject/:id',
+    ],
+    ai: ['POST /ai/improve/:postId'],
+    health: 'GET /health',
+  },
+};
+
 // Root & Health check routes
 app.get('/', (req, res) => {
-  res.status(200).json({
-    success: true,
-    message: "Welcome to Akatsuki's Draft API - AI-Enabled Content Sharing Platform",
-    version: '1.0.0',
-    documentation: {
-      auth: ['POST /auth/register', 'POST /auth/login', 'GET /auth/me'],
-      posts: [
-        'POST /posts',
-        'GET /posts',
-        'GET /posts/:id',
-        'GET /posts/my-posts',
-        'PATCH /posts/:id',
-        'DELETE /posts/:id',
-      ],
-      admin: [
-        'GET /admin/posts/pending',
-        'PATCH /admin/posts/approve/:id',
-        'PATCH /admin/posts/reject/:id',
-      ],
-      ai: ['POST /ai/improve/:postId'],
-      health: 'GET /health',
-    },
-  });
+  res.status(200).json(documentationResponse);
+});
+
+app.get('/api', (req, res) => {
+  res.status(200).json(documentationResponse);
 });
 
 app.get('/health', (req, res) => {
   res.status(200).json({ status: 'OK', timestamp: new Date().toISOString() });
 });
 
-// Mount API Routes
+app.get('/api/health', (req, res) => {
+  res.status(200).json({ status: 'OK', timestamp: new Date().toISOString() });
+});
+
+// Mount API Routes (standard root mounting)
 app.use('/auth', authRoutes);
 app.use('/posts', postRoutes);
 app.use('/admin/posts', adminRoutes);
 app.use('/ai', aiRoutes);
+
+// Also mount on /api/* prefixes so either format works seamlessly on Vercel
+app.use('/api/auth', authRoutes);
+app.use('/api/posts', postRoutes);
+app.use('/api/admin/posts', adminRoutes);
+app.use('/api/ai', aiRoutes);
 
 // Handle unhandled routes
 app.use((req, res, next) => {

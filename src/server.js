@@ -10,11 +10,11 @@ process.on('uncaughtException', (err) => {
   process.exit(1);
 });
 
-// Connect to Database immediately for serverless invocations
+// Connect to Database immediately
 connectDB();
 
-// Only listen on a port if running locally (Not on production Vercel)
-if (process.env.NODE_ENV !== 'production') {
+// Only listen on a port if running locally (not in serverless environments like Vercel)
+if (!process.env.VERCEL) {
   const server = app.listen(PORT, () => {
     console.log(`Server running locally in development mode on port ${PORT}`);
   });
