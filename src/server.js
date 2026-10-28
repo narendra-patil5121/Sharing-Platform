@@ -10,13 +10,16 @@ process.on('uncaughtException', (err) => {
   process.exit(1);
 });
 
-// Connect to Database and start server
-connectDB().then(() => {
+// Connect to Database immediately for serverless invocations
+connectDB();
+
+// Only listen on a port if running locally (Not on production Vercel)
+if (process.env.NODE_ENV !== 'production') {
   const server = app.listen(PORT, () => {
-    console.log(`Server running in ${process.env.NODE_ENV || 'development'} mode on port ${PORT}`);
+    console.log(`Server running locally in development mode on port ${PORT}`);
   });
 
-  // Handle unhandled promise rejections
+  // Handle unhandled promise rejections locally
   process.on('unhandledRejection', (err) => {
     console.error('UNHANDLED REJECTION! Shutting down gracefully...');
     console.error(err.name, err.message);
@@ -24,5 +27,7 @@ connectDB().then(() => {
       process.exit(1);
     });
   });
-});
+}
 
+// CRUCIAL: Export the app instance so Vercel can handle routing
+module.exports = app;
